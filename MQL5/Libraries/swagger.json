@@ -12,6 +12,9 @@
     "name" : "symbol",
     "description" : "Market symbol"
   },{
+    "name" : "candles",
+    "description" : "OHLCV candlestick data"
+  },{
     "name" : "account",
     "description" : "MT5 account"
   }, {
@@ -306,6 +309,64 @@
           },
           "400" : {
             "description" : "bad input parameter"
+          }
+        }
+      }
+    },
+    "/candles/{symbol}" : {
+      "get" : {
+        "tags" : [ "candles" ],
+        "parameters" : [
+          {
+            "name" : "symbol",
+            "in" : "path",
+            "required" : true,
+            "type" : "string",
+            "description" : "Trading symbol (e.g., EURUSD, .USTECHCash)"
+          },
+          {
+            "name" : "timeframe",
+            "in" : "query",
+            "required" : false,
+            "type" : "string",
+            "enum" : [ "M1", "M5", "M15", "M30", "H1", "H4", "D1", "W1", "MN1" ],
+            "default" : "M5",
+            "description" : "Candlestick timeframe"
+          },
+          {
+            "name" : "count",
+            "in" : "query",
+            "required" : false,
+            "type" : "integer",
+            "default" : 20,
+            "description" : "Number of candles to retrieve"
+          },
+          {
+            "name" : "start_pos",
+            "in" : "query",
+            "required" : false,
+            "type" : "integer",
+            "default" : 0,
+            "description" : "Starting position (0 = most recent candle)"
+          }
+        ],
+        "security" : [ { "apiKey" : [] } ],
+        "summary" : "Get OHLCV candlestick data",
+        "operationId" : "candles",
+        "description" : "Retrieves OHLCV (Open, High, Low, Close, Volume) candlestick data for a specified symbol and timeframe.\n",
+        "produces" : [ "application/json" ],
+        "responses" : {
+          "200" : {
+            "description" : "Array of candles in JSON",
+            "schema" : {
+              "$ref" : "#/definitions/CandlesResponse"
+            }
+          },
+          "400" : {
+            "description" : "Bad input parameter"
+          },
+          "404" : {
+            "description" : "Symbol not found"
           }
         }
       }
@@ -800,7 +861,7 @@
          "price_current" : {
             "type" : "number",
             "example" : 1.65656
-          },          
+          },
           "stoploss" : {
             "type" : "number",
             "example" : 1.65656
@@ -812,6 +873,64 @@
           "volume" : {
             "type" : "number",
             "example" : 0.1
+          }
+        }
+      }
+    },
+    "Candle" : {
+      "type" : "object",
+      "properties" : {
+        "time" : {
+          "type" : "string",
+          "format" : "date-time",
+          "example" : "2025-12-03T17:30:00.000Z",
+          "description" : "Candle open time (ISO 8601 format)"
+        },
+        "open" : {
+          "type" : "number",
+          "example" : 25450.5,
+          "description" : "Opening price"
+        },
+        "high" : {
+          "type" : "number",
+          "example" : 25465.0,
+          "description" : "Highest price"
+        },
+        "low" : {
+          "type" : "number",
+          "example" : 25440.0,
+          "description" : "Lowest price"
+        },
+        "close" : {
+          "type" : "number",
+          "example" : 25455.25,
+          "description" : "Closing price"
+        },
+        "tick_volume" : {
+          "type" : "integer",
+          "example" : 1250,
+          "description" : "Tick volume"
+        },
+        "spread" : {
+          "type" : "integer",
+          "example" : 5,
+          "description" : "Spread in points"
+        },
+        "real_volume" : {
+          "type" : "integer",
+          "example" : 0,
+          "description" : "Real volume (if available)"
+        }
+      }
+    },
+    "CandlesResponse" : {
+      "type" : "object",
+      "properties" : {
+        "candles" : {
+          "type" : "array",
+          "description" : "Array of OHLCV candles (newest first)",
+          "items" : {
+            "$ref" : "#/definitions/Candle"
           }
         }
       }
